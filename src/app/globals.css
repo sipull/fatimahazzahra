@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+@theme {
+  /* ==== ELEGANT SOFT SCRAPBOOK EDUCATION — design tokens ==== */
+  /* latar */
+  --color-cream: #fbf7ef;
+  --color-ivory: #fdfbf6;
+  --color-paper: #fffefb;
+  /* kertas daur ulang / kraft */
+  --color-kraft-100: #f5edde;
+  --color-kraft-200: #eadec9;
+  --color-kraft-300: #ddceb3;
+  --color-sand-100: #f6efe3;
+  --color-sand-200: #efe4d2;
+  /* aksen pink lembut */
+  --color-blush-100: #fae8ea;
+  --color-blush-200: #f3dcdf;
+  --color-blush-300: #eac6cb;
+  --color-rose-100: #f8e9eb;
+  --color-rose-200: #f3dcdf;
+  --color-rose-300: #e0b4ba;
+  --color-rose-400: #d19aa2;
+  --color-rose-500: #c48a93;
+  --color-rose-600: #a96e78;
+  --color-rose-700: #8b5861;
+  /* terracotta & cokelat hangat */
+  --color-terra-300: #e0a68d;
+  --color-terra-400: #d08b6f;
+  --color-terra-500: #c2705a;
+  --color-terra-600: #a65a45;
+  --color-cocoa-100: #f1eae2;
+  --color-cocoa-200: #ded2c6;
+  --color-cocoa-300: #c4b3a3;
+  --color-cocoa-400: #9c887a;
+  --color-cocoa-500: #7a6455;
+  --color-cocoa-600: #5f4c40;
+  --color-cocoa-700: #4a3a32;
+  --color-cocoa-800: #3a2d27;
+  --color-cocoa-900: #2c221e;
+  /* sage */
+  --color-sage-100: #eef1ea;
+  --color-sage-200: #dee5d9;
+  --color-sage-300: #c6d1bf;
+  --color-sage-400: #a8b5a2;
+  --color-sage-500: #8c9b85;
+  --color-sage-600: #6f7f69;
+
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Fraunces", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --font-hand: "Caveat", "Bradley Hand", "Segoe Script", cursive;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #fbf7ef;
+  color: #4a3a32;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #f3dcdf;
+  color: #3a2d27;
+}
+
+/* ---------- tipografi ---------- */
+.font-serif-display {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  letter-spacing: -0.015em;
+}
+.font-hand {
+  font-family: var(--font-hand);
+  letter-spacing: 0.01em;
+}
+.label-caps {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.dropcap::first-letter {
+  font-family: var(--font-serif);
+  float: left;
+  font-size: 3.5rem;
+  line-height: 0.82;
+  font-weight: 600;
+  padding: 0.14rem 0.55rem 0 0;
+  color: #c2705a;
+}
+
+/* ---------- struktur editorial ---------- */
+.hairline { border-top: 1px solid rgba(74, 58, 50, 0.16); }
+.dashed-rule { border-top: 1.5px dashed rgba(74, 58, 50, 0.26); }
+
+/* ---------- scrapbook: potongan kertas ---------- */
+.torn {
+  background-color: var(--color-paper);
+  clip-path: polygon(
+    0.6% 2.2%, 12% 0.4%, 26% 1.8%, 41% 0.2%, 58% 1.9%, 74% 0.3%, 89% 1.7%, 99.4% 0.8%,
+    99.8% 14%, 98.6% 29%, 100% 45%, 98.8% 61%, 99.9% 77%, 98.7% 92%, 99.3% 98.2%,
+    88% 99.6%, 73% 98.3%, 57% 99.8%, 42% 98.2%, 27% 99.7%, 12% 98.4%, 0.8% 99.3%,
+    0.2% 88%, 1.4% 72%, 0.1% 56%, 1.3% 41%, 0.2% 26%, 1.2% 12%
+  );
+}
+.torn-soft {
+  background-color: var(--color-paper);
+  clip-path: polygon(
+    1% 3%, 20% 1%, 44% 2.6%, 68% 0.8%, 88% 2.4%, 99% 1.2%,
+    99.4% 26%, 98.4% 52%, 99.6% 76%, 98.6% 97.4%,
+    78% 99%, 54% 97.6%, 30% 99.2%, 8% 98%, 0.6% 99%,
+    1.2% 74%, 0.4% 48%, 1.4% 24%
+  );
+}
+
+/* ---------- scrapbook: selotip ---------- */
+.tape {
+  position: absolute;
+  width: 96px;
+  height: 27px;
+  background: rgba(243, 220, 223, 0.82);
+  border-left: 1px dashed rgba(74, 58, 50, 0.16);
+  border-right: 1px dashed rgba(74, 58, 50, 0.16);
+  box-shadow: 0 1px 2px rgba(74, 58, 50, 0.1);
+}
+.tape-kraft { background: rgba(234, 222, 201, 0.9); }
+.tape-sage { background: rgba(198, 209, 191, 0.82); }
+
+/* ---------- polaroid ---------- */
+.polaroid {
+  background: #fffefb;
+  padding: 12px 12px 46px;
+  box-shadow: 0 1px 2px rgba(74, 58, 50, 0.08), 0 10px 26px rgba(74, 58, 50, 0.12);
+}
+.polaroid img { display: block; width: 100%; object-fit: cover; }
+
+/* ---------- kertas catatan / kutipan ---------- */
+.note-paper {
+  background-color: var(--color-kraft-100);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 31px,
+    rgba(194, 112, 90, 0.16) 31px 32px
+  );
+  box-shadow: 0 1px 2px rgba(74, 58, 50, 0.06);
+}
+.note-lines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 30px,
+    rgba(194, 112, 90, 0.15) 30px 31px
+  );
+}
+
+/* label / tab jurnal */
+.tab-label {
+  position: relative;
+  display: inline-block;
+  background: var(--color-kraft-200);
+  padding: 0.4rem 1rem;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+/* tekstur */
+.dot-grid {
+  background-image: radial-gradient(rgba(74, 58, 50, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.grid-faint {
+  background-image: linear-gradient(rgba(74, 58, 50, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 58, 50, 0.055) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.paper-fiber {
+  background-image: repeating-linear-gradient(
+      45deg,
+      rgba(74, 58, 50, 0.022) 0 2px,
+      transparent 2px 5px
+    ),
+    repeating-linear-gradient(-45deg, rgba(74, 58, 50, 0.02) 0 2px, transparent 2px 6px);
+}
+
+/* ---------- sketch frames ---------- */
+.sketch {
+  border: 1.6px solid #4a3a32;
+  border-radius: 14px 18px 12px 20px / 18px 12px 20px 14px;
+}
+.sketch-soft {
+  border: 1.4px solid rgba(74, 58, 50, 0.4);
+  border-radius: 16px 12px 20px 14px / 12px 20px 14px 18px;
+}
+.sketch-rose {
+  border: 1.6px solid #c48a93;
+  border-radius: 20px 14px 18px 12px / 14px 20px 12px 18px;
+}
+.sketch-shift { transition: border-radius 0.45s ease, transform 0.45s ease, box-shadow 0.45s ease; }
+.sketch-shift:hover {
+  border-radius: 20px 12px 16px 22px / 12px 22px 16px 20px;
+  transform: translateY(-3px);
+}
+
+/* bayangan sangat lembut */
+.lift { box-shadow: 0 1px 2px rgba(74, 58, 50, 0.05), 0 8px 22px rgba(74, 58, 50, 0.07); }
+.lift:hover { box-shadow: 0 2px 4px rgba(74, 58, 50, 0.06), 0 16px 32px rgba(74, 58, 50, 0.1); }
+
+/* ---------- animasi ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.75s cubic-bezier(0.22, 0.61, 0.36, 1), transform 0.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+.float-slow { animation: floaty 7s ease-in-out infinite; }
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .float-slow { animation: none; }
+  .sketch-shift, .sketch-shift:hover { transform: none; transition: none; }
+}
+
+/* ---------- prose ---------- */
+.prose-portofolio p { margin-bottom: 1rem; line-height: 1.85; color: #5f4c40; }
+.prose-portofolio p:last-child { margin-bottom: 0; }
+.prose-portofolio strong { color: #3a2d27; font-weight: 700; }
+
+/* ---------- interaksi ---------- */
+a, button { transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2.5px solid #c2705a;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.link-underline {
+  background-image: linear-gradient(#c2705a, #c2705a);
+  background-size: 0% 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.35s ease;
+  padding-bottom: 2px;
+}
+.link-underline:hover { background-size: 100% 1.5px; }
+
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
