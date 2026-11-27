@@ -33,6 +33,16 @@ async function ensureTables() {
       updated_at TIMESTAMP DEFAULT NOW()
     );
   `);
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS media (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      mime TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      data TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
   await db.execute(sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`);
 }
 

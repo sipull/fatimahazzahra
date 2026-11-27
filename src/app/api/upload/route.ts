@@ -3,6 +3,9 @@ import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { isAllowed, looksDangerous, makeStoredName, sanitizeFileName, MAX_FILE_BYTES, MAX_IMAGE_BYTES } from "@/lib/upload";
+import { db } from "@/db";
+import { media } from "@/db/schema";
+import { ensureSeed } from "@/lib/seed";
 
 export const dynamic = "force-dynamic";
 
@@ -48,12 +51,47 @@ export async function POST(req: Request) {
   }
 
   const stored = makeStoredName(original);
-  const dir = join(process.cwd(), "public", "uploads");
+  const bytes = Buffer.from(await file.arrayBuffer());
+  const mimeType = file.type || "application/octet-stream";
+  let dbSaved = false;
+  let diskSaved = false;
+
+  // 1. Simpan ke database Neon (agar persisten & bekerja di serverless Vercel)
   try {
+    await ensureSeed();
+    await db
+      .insert(media)
+      .values({
+        id: stored,
+        name: original,
+        mime: mimeType,
+        size: file.size,
+        data: bytes.toString("base64"),
+      })
+      .onConflictDoUpdate({
+        target: media.id,
+        set: {
+          data: bytes.toString("base64"),
+          size: file.size,
+          mime: mimeType,
+        },
+      });
+    dbSaved = true;
+  } catch (dbErr) {
+    console.error("Gagal menyimpan ke database:", dbErr);
+  }
+
+  // 2. Coba simpan ke disk lokal (untuk pengembangan di localhost/server lokal)
+  try {
+    const dir = join(process.cwd(), "public", "uploads");
     await mkdir(dir, { recursive: true });
-    const bytes = Buffer.from(await file.arrayBuffer());
     await writeFile(join(dir, stored), bytes);
+    diskSaved = true;
   } catch {
+    // Normal terjadi di lingkungan serverless seperti Vercel (read-only filesystem)
+  }
+
+  if (!dbSaved && !diskSaved) {
     return NextResponse.json({ error: "Penyimpanan berkas gagal. Coba lagi atau gunakan ukuran lebih kecil." }, { status: 500 });
   }
 
@@ -65,7 +103,7 @@ export async function POST(req: Request) {
       url: `/uploads/${stored}`,
       apiUrl: `/api/media/${stored}`,
       size: file.size,
-      mime: file.type || "application/octet-stream",
+      mime: mimeType,
     },
   });
 }

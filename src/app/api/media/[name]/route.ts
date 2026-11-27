@@ -1,31 +1,12 @@
 import { NextResponse } from "next/server";
 import { readFile, stat } from "fs/promises";
 import { join, basename } from "path";
+import { eq } from "drizzle-orm";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { getAllSettings, listEntries } from "@/lib/data";
-
-async function serveFile(req: Request, safe: string): Promise<NextResponse> {
-  const path = join(process.cwd(), "public", "uploads", safe);
-  const st = await stat(path).catch(() => null);
-  if (!st || !st.isFile()) return NextResponse.json({ error: "Tidak ditemukan." }, { status: 404 });
-  const buf = await readFile(path);
-  const mime = mimeFor(safe);
-  const download = new URL(req.url).searchParams.get("download") === "1";
-  const headers: Record<string, string> = {
-    "Content-Type": mime,
-    "Content-Length": String(buf.length),
-    "Cache-Control": "private, max-age=300",
-    "X-Content-Type-Options": "nosniff",
-    "Content-Security-Policy": "sandbox",
-  };
-  if (download) headers["Content-Disposition"] = `attachment; filename="${safe}"`;
-  else if (!mime.startsWith("image/") && !mime.startsWith("video/") && mime !== "application/pdf" && !mime.startsWith("text/")) {
-    headers["Content-Disposition"] = `attachment; filename="${safe}"`;
-  } else {
-    headers["Content-Disposition"] = `inline; filename="${safe}"`;
-  }
-  return new NextResponse(new Uint8Array(buf), { headers });
-}
+import { db } from "@/db";
+import { media } from "@/db/schema";
+import { ensureSeed } from "@/lib/seed";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +32,54 @@ function mimeFor(name: string): string {
   return map[ext] ?? "application/octet-stream";
 }
 
+function createMediaResponse(buf: Buffer, mime: string, safe: string, download: boolean): NextResponse {
+  const headers: Record<string, string> = {
+    "Content-Type": mime,
+    "Content-Length": String(buf.length),
+    "Cache-Control": "public, max-age=31536000, immutable",
+    "X-Content-Type-Options": "nosniff",
+  };
+  if (download) {
+    headers["Content-Disposition"] = `attachment; filename="${safe}"`;
+  } else if (!mime.startsWith("image/") && !mime.startsWith("video/") && mime !== "application/pdf" && !mime.startsWith("text/")) {
+    headers["Content-Disposition"] = `attachment; filename="${safe}"`;
+  } else {
+    headers["Content-Disposition"] = `inline; filename="${safe}"`;
+  }
+  return new NextResponse(new Uint8Array(buf), { headers });
+}
+
+async function serveFile(req: Request, safe: string): Promise<NextResponse> {
+  const download = new URL(req.url).searchParams.get("download") === "1";
+
+  // 1. Coba baca dari filesystem disk lokal (development/VPS)
+  const path = join(process.cwd(), "public", "uploads", safe);
+  const st = await stat(path).catch(() => null);
+  if (st && st.isFile()) {
+    try {
+      const buf = await readFile(path);
+      return createMediaResponse(buf, mimeFor(safe), safe, download);
+    } catch {
+      // lanjut coba dari database
+    }
+  }
+
+  // 2. Coba baca dari database Neon (serverless Vercel)
+  try {
+    await ensureSeed();
+    const rows = await db.select().from(media).where(eq(media.id, safe)).limit(1);
+    if (rows.length > 0 && rows[0].data) {
+      const buf = Buffer.from(rows[0].data, "base64");
+      const mime = rows[0].mime || mimeFor(safe);
+      return createMediaResponse(buf, mime, safe, download);
+    }
+  } catch (err) {
+    console.error("Gagal membaca media dari database:", err);
+  }
+
+  return NextResponse.json({ error: "Tidak ditemukan." }, { status: 404 });
+}
+
 export async function GET(req: Request, ctx: { params: Promise<{ name: string }> }) {
   const { name } = await ctx.params;
   // cegah path traversal
@@ -60,16 +89,13 @@ export async function GET(req: Request, ctx: { params: Promise<{ name: string }>
   }
   if (safe.startsWith(".")) return NextResponse.json({ error: "Tidak ditemukan." }, { status: 404 });
 
-  // Periksa izin: jika file hanya dirujuk konten draf/privat (atau belum dirujuk), wajib login admin
-  const url = new URL(req.url);
-  void url;
   try {
     const authed = await isAdminAuthenticated();
     if (!authed) {
-      // 1) Berkas yang dirujuk pengaturan situs (foto profil/hero, CV) bersifat publik
+      // 1) Berkas yang dirujuk oleh pengaturan situs (foto profil, hero, galeri beranda, CV) bersifat publik
       const s = await getAllSettings();
-      const settingRefs = ["hero_image", "profile_photo", "cv_file"];
-      const usedBySetting = settingRefs.some((k) => (s[k] ?? "").includes(safe));
+      const settingValues = Object.values(s);
+      const usedBySetting = settingValues.some((v) => typeof v === "string" && v.includes(safe));
       if (usedBySetting) {
         return serveFile(req, safe);
       }

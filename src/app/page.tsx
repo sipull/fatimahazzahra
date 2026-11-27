@@ -36,7 +36,7 @@ export default async function BerandaPage() {
   const owner = s.full_name?.trim() || s.owner_name || "Fatimah Azzahra’, S.Pd.";
   const namaBesar = (s.hero_title || "FATIMAH AZZAHRA’").toUpperCase();
   const subjudul = s.hero_subtitle || s.owner_title || "Calon Guru, Pembelajar Sepanjang Hayat";
-  const foto = s.hero_image?.trim();
+  const foto = "/src/foto/IMG_0620.jpeg";
   const fotoPos = s.hero_image_pos || "50% 30%";
   const identitas = [
     { label: "Nama", value: owner },
